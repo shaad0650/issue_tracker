@@ -1,0 +1,7 @@
+export const ALLOWED_TRANSITIONS = {
+  BACKLOG: ["TODO"],
+  TODO: ["IN_PROGRESS"],
+  IN_PROGRESS: ["REVIEW"],
+  REVIEW: ["DONE", "IN_PROGRESS"],
+  DONE: [],
+};

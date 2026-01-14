@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "refreshToken" ALTER COLUMN "createdAt" SET DEFAULT CURRENT_TIMESTAMP;

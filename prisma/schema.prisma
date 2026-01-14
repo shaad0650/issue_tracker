@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  passwordHash   String
+  role           Role           @default(DEV)
+  createdAt      DateTime       @default(now())
+  //bug fix for the refreshToken
+  refreshTokens  refreshToken[]
+  assignedIssues Issue[]        @relation("UserAssignments")
+}
+
+enum Role {
+  ADMIN
+  DEV
+  VIEWER
+}
+
+model refreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+
+  issues Issue[]
+}
+
+model Issue {
+  id          String      @id @default(uuid())
+  title       String
+  description String
+  status      IssueStatus @default(BACKLOG)
+  priority    Priority    @default(MEDIUM)
+  projectId   String
+  project     Project     @relation(fields: [projectId], references: [id])
+
+  assigneeId String?
+  assignee   User?   @relation("UserAssignments", fields: [assigneeId], references: [id])
+
+  createdBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum IssueStatus {
+  BACKLOG
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model AuditLog{
+  id String @id @default(uuid())
+  entityType String
+  entityId String
+  action String   //"status changed | assigned | priority changed | updated
+  oldValue String?
+  newValue String?
+  changedBy String
+  createdAt DateTime @default(now())
+}
